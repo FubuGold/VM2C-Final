@@ -10,4 +10,10 @@ env = gp.Env(params=params)
 
 # Create the model within the Gurobi environment
 model = gp.Model(env=env)
-model.addVar()
+
+import pandas as pd 
+import numpy as np 
+staff = pd.read_csv("staff.txt", sep=" ")
+rot = np.loadtxt("Rot_availability.txt",dtype ="str")
+pallet = np.loadtxt("Pallet1_availability.txt",dtype ="str")
+compressor = np.loadtxt("Compressor_availability.txt",dtype ="str")
