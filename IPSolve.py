@@ -1,4 +1,3 @@
-import gurobipy
 import gurobipy as gp  # import the installed package
 from gurobipy import GRB
 params = {
@@ -9,5 +8,7 @@ params = {
 env = gp.Env(params=params)
 
 # Create the model within the Gurobi environment
-model = gp.Model(env=env)   
+model = gp.Model(env=env)
+
+S = model.addMVars
    
