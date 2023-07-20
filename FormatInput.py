@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-command =pd.read_csv("VM2C/duLieu1/Command-1.txt",sep = "; ")
+command =pd.read_csv("VM2C/duLieu1/Command-1.txt",sep = " ")
 class Readfile:
 
     daychuyen_code_to_id = {'Day_chuyen_1' : 0, 'Day_chuyen_2' : 1,'Day_chuyen_3' : 2}
