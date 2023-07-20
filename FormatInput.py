@@ -4,7 +4,7 @@ import pandas as pd
 class Readfile:
 
     daychuyen_code_to_id = {'Day_chuyen_1' : 0, 'Day_chuyen_2' : 1,'Day_chuyen_3' : 2}
-    skill_to_id = {"Rot" : 0, "Pallet" : 1, "May_dong_hop" : 2}
+    skill_to_id = {"Rot" : 0, "May_dong_hop" : 1, "Pallet" : 2}
 
     def __init__(self):
         pass
@@ -15,23 +15,23 @@ class Readfile:
         code_to_id = dict(zip(staff["ma_nhan_su"], staff["so_thu_tu"]) )
         id_to_code = dict(zip(staff["so_thu_tu"], staff["ma_nhan_su"]) )
 
-        skill = np.zeros(shape = (len(code_to_id), 3) , dtype = int)
+        skill = np.zeros(shape = (3,len(code_to_id), 3) , dtype = int)
 
         # rot = 0, pallet = 1, compressor = 2
         rot = np.loadtxt("VM2C/duLieu1/Rot_availability.txt",dtype ="str")
         for nhan_vien in rot:
             id = code_to_id[nhan_vien] 
-            skill[id,0] = 1
-        
-        pallet = np.loadtxt("VM2C/duLieu1/Pallet1_availability.txt",dtype ="str")
-        for nhan_vien in pallet:
-            id = code_to_id[nhan_vien]
-            skill[id,1] = 1
+            skill[0,id,0] = 1
 
         compressor = np.loadtxt("VM2C/duLieu1/Compressor_availability.txt",dtype ="str")
         for nhan_vien in compressor:
             id = code_to_id[nhan_vien]
-            skill[id,2] = 1
+            skill[0,id,1] = 1
+        
+        pallet = np.loadtxt("VM2C/duLieu1/Pallet1_availability.txt",dtype ="str")
+        for nhan_vien in pallet:
+            id = code_to_id[nhan_vien]
+            skill[0,id,2] = 1
 
         timetable = np.zeros( (29,3,3) ,dtype = int)
                                 # Ngay Day-Chuyen Ca
@@ -52,31 +52,46 @@ class Readfile:
                 if time[1] <= "22:00:00":
                     timetable[day][0][1] = 1
         
-        return (id_to_code, skill, timetable)
+        chain_need = [[],[0,0,0],[0,0,0]]
+        with open("VM2C/duLieu1/Variable.txt","r") as f:
+            temp = [x.split() for x in f.readlines()]
+            for x in temp:
+                chain_need[0].append(int(x[2]))
+
+        return (id_to_code, skill, timetable, chain_need)
         
-        
-    def readDataset2(self):
-        ...
-        
-def PrintInput():
-    Reader = Readfile()
-    hash_table, skill, timetable = Reader.readDataset1()
-    with open("FormattedInput.txt","w") as f:
-        f.write(str(len(hash_table)) + '\n')
-        for row in skill:
-            for val in row:
-                f.write(str(val) + ' ')
-            f.write("\n")
-        f.write('\n')
-        for axis1 in timetable:
-            for axis2 in axis1:
-                for val in axis2:
+    def PrintInput1(self):
+        hash_table, skill, timetable, chain_need = self.readDataset1()
+        with open("FormattedInput.txt","w") as f:
+            f.write(str(len(hash_table)) + ' 1\n')
+
+            for axis1 in skill:
+                for axis2 in axis1:
+                    for val in axis2:
+                        f.write(str(val) + ' ')
+                    f.write('\n')
+                f.write('\n')
+            
+            for row in chain_need:
+                for val in row:
                     f.write(str(val) + ' ')
                 f.write('\n')
             f.write('\n')
 
-        
+            for axis1 in timetable:
+                for axis2 in axis1:
+                    for val in axis2:
+                        f.write(str(val) + ' ')
+                    f.write('\n')
+                f.write('\n')
+    
+    def readDataset2(self):
+        ...
+
+def test():
+    Reader = Readfile()
+    Reader.PrintInput1()
         
 
 if __name__ == '__main__':
-    PrintInput()
+    test()
