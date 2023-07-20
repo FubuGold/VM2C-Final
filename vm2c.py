@@ -9,5 +9,5 @@ params = {
 env = gp.Env(params=params)
 
 # Create the model within the Gurobi environment
-model = gp.Model(env=env)
-
+model = gp.Model(env=env)   
+   
