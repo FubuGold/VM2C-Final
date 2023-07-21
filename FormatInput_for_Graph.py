@@ -72,7 +72,7 @@ class Readfile:
         hash_table, skill, timetable, chain_need = self.readDataset1()
         with open("FormattedInput.txt","w") as f:
             f.write(str(len(hash_table)) + ' 1\n')
-
+        
             for axis1 in skill:
                 for axis2 in axis1:
                     for val in axis2:

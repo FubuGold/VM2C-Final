@@ -13,6 +13,7 @@ typedef pair<int, pair<int, int> > pipii;
 const int N = 2000;
 int s, t, n, m, trace[N], f[N][N], sizeee;
 int ava[4][4];
+int ablework[N];
 int num_Conveyor; 
 pair<int, int> NS[N];
 queue<int> query, mem;
@@ -26,7 +27,7 @@ bool findPath(vector< vector<int> > c, int source, int sink)
     while (!q.empty())
     {
         int u = q.top().id; q.pop();
-        for (int v = 1; v <= sizeee; v++)
+        for (int v = 0; v <= sizeee; v++)
         {
             if (c[u][v] > f[u][v] && !trace[v])
             {
@@ -65,6 +66,7 @@ void readfile(vector< vector<int> >& c)
             while (num--)
             {
                 int emp; cin >> emp;
+                ablework[emp]++;
                 for (int y = 1; y <= 3; y++)
                     c[n + 3*(emp-1) + y][4*n + 9*i + skill*3 + y] = 1;
             }
@@ -161,21 +163,24 @@ void solve(vector< vector<int> > c)
         while (num--)
         {
             int shift; cin >> shift;
-            for (int skill = 0; skill < 3; skill++)
+            int skill = 0;
                 for (int j = 4*n+shift; j < sizeee; j += 3)
-                    c[j][t] = ava[i][skill];
+                    {
+                        c[j][t] = ava[i][skill++];
+                        // c[j+1][t] = ava[i][1];
+                        // c[j+2][t] = ava[i][2];
+                        skill %=3;
+                        // cout << i << ' ' << skill << ' ' << ava[i][skill] << '\n';
+                        // cout << skill << ' ' << ava[i][skill] << ' ';
+                    }
         }
     }
-    for (int i = 0; i < num_Conveyor; i++)
-        for (int j = 0; j < 3; j++)
-            cout << ava[i][j] << ' ';
-    cout << '\n';
     while(findPath(c,s,t))
         incFlow(c,s,t);
-    for (int i = 0; i <= sizeee; i++)
+    for (int i = 4*n+1; i <= 4*n+10; i++)
     {
-        for (int j = 0; j <= sizeee; j++)
-            cout << f[i][j] << ' ';
+        for (int j = 4*n+0; j <= 4*n+10; j++)
+            cout << c[i][j] << ' ';
         cout << '\n';
     }
 }
@@ -199,19 +204,13 @@ int main()
         NS[i].workday = 24;
         NS[i].night = 0;
     }
-    for (int day = 1; day <= 3; day++) // check
+    for (int day = 1; day <= 1; day++) // check
     {
         update(c);
         solve(c);
         print_answer(day);
     }   
     b = clock(); 
-    // for (int i = 0; i <= sizeee; i++)
-    // {
-    //     for (int j = 0; j <= sizeee; j++)
-    //         cout << c[i][j] << ' ';
-    //     cout << '\n';
-    // }
     double time = (b - a)*1.0/ CLOCKS_PER_SEC;
-    cout << setprecision(3) << fixed << time;
+    cerr << setprecision(3) << fixed << time;
 }
