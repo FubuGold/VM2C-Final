@@ -177,12 +177,6 @@ void solve(vector< vector<int> > c)
     }
     while(findPath(c,s,t))
         incFlow(c,s,t);
-    for (int i = 4*n+1; i <= 4*n+10; i++)
-    {
-        for (int j = 4*n+0; j <= 4*n+10; j++)
-            cout << c[i][j] << ' ';
-        cout << '\n';
-    }
 }
 int main()
 {
@@ -204,7 +198,7 @@ int main()
         NS[i].workday = 24;
         NS[i].night = 0;
     }
-    for (int day = 1; day <= 1; day++) // check
+    for (int day = 1; day <= 3; day++) // check
     {
         update(c);
         solve(c);
