@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import pandas as pd
 class Readfile:
@@ -10,11 +9,13 @@ class Readfile:
     def __init__(self):
         pass
 
-    def readDataset1(self):
-        data_path_1 = r"duLieu1"
-        data_path_2 = r"duLieu2"
-        num_folds = 1
-        data_path = data_path_1
+    def readDataset(self,datapack):
+        if datapack == 1:
+            num_folds = 1
+            data_path = r"duLieu1"
+        else:
+            num_folds = 3
+            data_path = r"duLieu2"
         
         timetable = np.zeros( (29,3,3) ,dtype = int)
                                 # Ngay Day-Chuyen Ca
@@ -53,25 +54,29 @@ class Readfile:
                 next_day = int(time[2][-2:])
                 if time[1] < "06:00:00":
                     timetable[day-1][i][2] = 1
-                if time[1] <= "14:00:00":
+                if time[1] <= "14:00:00" and time[1] >= "06:00:00":
                     timetable[day][i][0] = 1
                 if next_day > day or time[3] > "22:00:00":
                     timetable[day][i][2] = 1
-                if time[1] <= "22:00:00":
+                if time[1] <= "22:00:00" and time[1] > "14:00:00":
                     timetable[day][i][1] = 1
         
-        chain_need = [[],[0,0,0],[0,0,0]]
+        chain_need = [[],[],[]]
         with open(f"VM2C/{data_path}/02_dinh_bien.txt","r") as f:
             temp = [x.split() for x in f.readlines()]
             for x in temp:
-                chain_need[0].append(int(x[2]))
+                chain_need[int(x[0][-1])-1].append(int(x[2]))
         
+        if chain_need[0] == []: chain_need[0] = np.zeros((3))
+        if chain_need[1] == []: chain_need[1] = np.zeros((3))
+        if chain_need[2] == []: chain_need[2] = np.zeros((3))
+
         return (id_to_code, skill, timetable, chain_need)
         
-    def PrintInput1(self):
-        hash_table, skill, timetable, chain_need = self.readDataset1()
+    def PrintInput(self,datapack):
+        hash_table, skill, timetable, chain_need = self.readDataset(datapack=datapack)
         with open("FormattedInput.txt","w") as f:
-            f.write(str(len(hash_table)) + ' 1\n')
+            f.write(str(len(hash_table)) + '\n')
 
             for axis1 in skill:
                 for axis2 in axis1:
@@ -98,7 +103,7 @@ class Readfile:
 
 def test():
     Reader = Readfile()
-    Reader.PrintInput1()
+    Reader.PrintInput(datapack=2)
         
 
 if __name__ == '__main__':

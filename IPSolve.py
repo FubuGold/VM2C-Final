@@ -1,7 +1,7 @@
 import numpy as np
 import gurobipy as gp  # import the installed package
 from gurobipy import GRB
-
+import matplotlib.pyplot as plt 
 # --------------------------------
 # Create constant, variable
 N_CHAIN, N_SHIFT, N_SKILL = 3,3,3
@@ -56,6 +56,7 @@ skill = np.array(skill) # Chain - Worker - Skill
 timetable = np.array(timetable) # Day - Chain - Shift
 chain_need = np.array(chain_need) # Chain - Skill
 shift_count = np.zeros((n_worker,2)) # Worker - Shift (Day - Night)
+selected = np.zeros((n_worker),dtype=bool)
 # print(skill)
 # print(timetable)
 # print(chain_need)
@@ -79,7 +80,7 @@ def ScheduleDay(prevSchedule,day):
     for chain in range(N_CHAIN):
         for sk in range(N_SKILL):
             for shift in range(N_SHIFT):
-                model.addConstr(lmao[chain,shift,:,sk].sum() == chain_need[chain,sk]) # Đủ nhân lực cho từng công việc từng dây chuyền từng ca 
+                model.addConstr(lmao[chain,shift,:,sk].sum() == chain_need[chain,sk]*timetable[day,chain,shift]) # Đủ nhân lực cho từng công việc từng dây chuyền từng ca 
         for ppl in range(n_worker):
             for sk in range(N_SKILL):
                 model.addConstr(lmao[chain,:,ppl,sk].sum() <= skill[chain,ppl,sk]) # Nhân sự làm đúng kĩ năng
@@ -87,15 +88,13 @@ def ScheduleDay(prevSchedule,day):
     model.addConstrs(lmao[:,:,ppl,:].sum() <= 1 for ppl in range(n_worker)) # Mỗi ngày làm 1 việc 1 ca 1 dây chuyền
     model.addConstrs(lmao[:,0,ppl,:].sum() <= 1 - prevSchedule[:,2,ppl,:].sum() for ppl in range(n_worker)) # Làm ca 3 hôm trước ko làm ca 1 hôm sau
 
-    
-
     # Set objective
     balance_arr = [balance(lmao[:,:2,ppl,:].sum(),lmao[:,2,ppl,:].sum(),ppl) for ppl in range(n_worker)]
     num_of_pair = int((n_worker / 2) * (n_worker - 1))
     obj = 0
     for id1 in range(n_worker):
         for id2 in range(id1,n_worker):
-            obj = obj + (balance_arr[i] - balance_arr[j]) * (balance_arr[i] - balance_arr[j])
+            obj = obj + (balance_arr[id1] - balance_arr[id2]) * (balance_arr[id1] - balance_arr[id2])
         obj = obj / num_of_pair
 
     model.setObjective(obj,sense = GRB.MINIMIZE)
@@ -103,15 +102,17 @@ def ScheduleDay(prevSchedule,day):
     model.optimize()
 
     if model.status == GRB.OPTIMAL:
-        return lmao.x.astype(int)
+        return lmao.x.astype(int),obj.getValue()
     else: return -1
     
-def main():
+def solve_a():
     prevSchedule = np.zeros((3,3,n_worker,3))
-    f = open("result_data_1_part_a.txt","w")
-
+    datapack = 1
+    if datapack == 1: f = open("result_data_1_part_a.txt","w")
+    else: f = open("result_data_2_part_a.txt","w")
+    result = []
     for day in range(1,29):
-        res = ScheduleDay(prevSchedule=prevSchedule,day=day)
+        res,obj = ScheduleDay(prevSchedule=prevSchedule,day=day)
         for chain in range(N_CHAIN):
             for shift in range(N_SHIFT):
                 for sk in range(N_SKILL):
@@ -119,16 +120,18 @@ def main():
                         if res[chain,shift,ppl,sk]: 
                             tmp = str(day)
                             if len(tmp) == 1: tmp = "0" + tmp
-                            f.write(f"{tmp}.06.2023 Ca_{shift+1} {id_to_code[ppl]} Day_chuyen_{chain+1} {sk}\n")
+                            f.write(f"{tmp}.06.2023 Ca_{shift+1} {id_to_code[ppl]} Day_chuyen_{chain+1} {id_to_skill[sk]}\n")
+        result.append(obj)                  
         prevSchedule = res
         for ppl in range(n_worker):
             shift_count[ppl,0] += res[:,:2,ppl,:].sum()
             shift_count[ppl,1] += res[:,2,ppl,:].sum()
-    
-    f.close()
-                        
-                        
+    print(np.array(result).shape)
+    plt.plot(np.array(result))
+    plt.show()
+
+def solve_b():
+    ...
 
 if __name__ == "__main__":
-    main()
-    ...
+    solve_a()
