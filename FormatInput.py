@@ -6,6 +6,7 @@ class Readfile:
     daychuyen_code_to_id = {'Day_chuyen_1' : 0, 'Day_chuyen_2' : 1,'Day_chuyen_3' : 2}
     skill_to_id = {"Rot" : 0, "May_dong_hop" : 1, "Pallet" : 2}
     
+
     def __init__(self):
         pass
 
@@ -22,6 +23,7 @@ class Readfile:
         code_to_id = dict(zip(staff["ma_nhan_su"], staff["so_thu_tu"]) )
         id_to_code = dict(zip(staff["so_thu_tu"], staff["ma_nhan_su"]) )
          
+
         skill = np.zeros(shape = (3,len(code_to_id), 3) , dtype = int)
 
         # rot = 0, pallet = 1, compressor = 2
@@ -63,7 +65,7 @@ class Readfile:
             temp = [x.split() for x in f.readlines()]
             for x in temp:
                 chain_need[0].append(int(x[2]))
-
+        
         return (id_to_code, skill, timetable, chain_need)
         
     def PrintInput1(self):
