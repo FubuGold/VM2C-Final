@@ -1,3 +1,4 @@
+import FormatInput
 import numpy as np
 import gurobipy as gp  # import the installed package
 from gurobipy import GRB
@@ -5,6 +6,9 @@ import matplotlib.pyplot as plt
 # --------------------------------
 # Create constant, variable
 N_CHAIN, N_SHIFT, N_SKILL = 3,3,3
+
+datapack = 1
+
 skill = []
 timetable = []
 chain_need = []
@@ -13,6 +17,13 @@ id_to_code = {}
 id_to_skill = {0 : "Rot", 1 : "May_dong_hop", 2 : "Pallet"}
 
 shift_count = None
+
+# --------------------------------
+# Create Input
+def createInput():
+    global datapack
+    reader = FormatInput.Readfile
+    print
 
 # --------------------------------
 # Create model
@@ -72,7 +83,7 @@ def ScheduleDay(prevSchedule,day):
     model = gp.Model(env=env) # Create Model
 
     # Create Variable
-    lmao = model.addMVar(shape = (3,3,n_worker,3), vtype = GRB.BINARY)
+    lmao = model.addMVar(shape = (N_CHAIN,N_SHIFT,n_worker,N_SKILL), vtype = GRB.BINARY)
     #                Chain - Shift - Worker - Skill
 
     # Create Constraint
@@ -106,8 +117,8 @@ def ScheduleDay(prevSchedule,day):
     else: return -1
     
 def solve_a():
+    global datapack
     prevSchedule = np.zeros((3,3,n_worker,3))
-    datapack = 1
     if datapack == 1: f = open("result_data_1_part_a.txt","w")
     else: f = open("result_data_2_part_a.txt","w")
     result = []
