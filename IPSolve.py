@@ -91,7 +91,8 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
     # Create Variable
     lmao = model.addMVar(shape = (N_CHAIN,N_SHIFT,n_worker,N_SKILL), vtype = GRB.BINARY)
     #                               Chain - Shift - Worker - Skill
-
+    max_shift = model.addVar(vtype = GRB.INTEGER)
+    min_shift = model.addVar(vtype = GRB.INTEGER)
     # Create Constraint
     
     for chain in range(N_CHAIN):
@@ -105,6 +106,9 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
     model.addConstrs(lmao[:,:,ppl,:].sum() <= 1 for ppl in range(n_worker)) # Mỗi ngày làm 1 việc 1 ca 1 dây chuyền
     model.addConstrs(lmao[:,0,ppl,:].sum() <= 0 for ppl in nightWorker) # Làm ca 3 hôm trước ko làm ca 1 hôm sau
 
+    model.addConstrs(lmao[:,:,ppl,:].sum() + shift_count[ppl].sum() <= max_shift for ppl in range(n_worker))
+    model.addConstrs(lmao[:,:,ppl,:].sum() + shift_count[ppl].sum() >= min_shift for ppl in range(n_worker))
+
     if (prob == 2):
         model.addConstrs(day_left[ppl] - lmao[:,:,ppl,:].sum() >= 0 for ppl in range(n_worker))
     
@@ -114,14 +118,15 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
 
     # Set objective
     if (prob == 1) or (prob == 2 and stage == 2):
-        # balance_arr = [balance(lmao[:,:2,ppl,:].sum(),lmao[:,2,ppl,:].sum(),ppl) for ppl in range(n_worker)]
-        balance_arr = [lmao[:,:,ppl,:].sum() + shift_count[ppl,:].sum() for ppl in range(n_worker)]
-        num_of_pair = int((n_worker / 2) * (n_worker - 1))
-        obj = 0
-        for id1 in range(n_worker):
-            for id2 in range(id1,n_worker):
-                obj = obj + (balance_arr[id1] - balance_arr[id2]) * (balance_arr[id1] - balance_arr[id2])
-            obj = obj / num_of_pair
+        obj = max_shift - min_shift
+        # # balance_arr = [balance(lmao[:,:2,ppl,:].sum(),lmao[:,2,ppl,:].sum(),ppl) for ppl in range(n_worker)]
+        # balance_arr = [lmao[:,:,ppl,:].sum() + shift_count[ppl,:].sum() for ppl in range(n_worker)]
+        # num_of_pair = int((n_worker / 2) * (n_worker - 1))
+        # obj = 0
+        # for id1 in range(n_worker):
+        #     for id2 in range(id1,n_worker):
+        #         obj = obj + (balance_arr[id1] - balance_arr[id2]) * (balance_arr[id1] - balance_arr[id2])
+        #     obj = obj / num_of_pair
         
         model.setObjective(obj,sense = GRB.MINIMIZE)
     else:
@@ -243,5 +248,5 @@ def solve_b():
 
 
 if __name__ == "__main__":
-    solve_a()
-    # solve_b()
+    # solve_a()
+    solve_b()
