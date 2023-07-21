@@ -11,8 +11,8 @@ class Readfile:
         pass
 
     def readDataset1(self):
-        data_path_1 = r"/duLieu1"
-        data_path_2 = r"/duLieu2"
+        data_path_1 = r"duLieu1"
+        data_path_2 = r"duLieu2"
         num_folds = 3 
         data_path = data_path_2
         
@@ -28,12 +28,12 @@ class Readfile:
 
         # rot = 0, pallet = 1, compressor = 2
         for i in range(num_folds): 
-         rot = np.loadtxt(f"VM2C/{data_path}/ky_nang_Day_chuyen_{i}_Rot.txt",dtype ="str")
+         rot = np.loadtxt(f"VM2C/{data_path}/ky_nang_Day_chuyen_{i+1}_Rot.txt",dtype ="str")
          for nhan_vien in rot:
             id = code_to_id[nhan_vien] 
             skill[i,id,0] = 1   
 
-         compressor = np.loadtxt(f"VM2C/{data_path}/ky_nang_Day_chuyen_{i}_May_dong_thit.txt",dtype ="str")
+         compressor = np.loadtxt(f"VM2C/{data_path}/ky_nang_Day_chuyen_{i+1}_May_dong_hop.txt",dtype ="str")
          for nhan_vien in compressor:
             id = code_to_id[nhan_vien]
             skill[i,id,1] = 1
