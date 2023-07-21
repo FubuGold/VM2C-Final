@@ -138,6 +138,7 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
     tmp = model.status
 
     if tmp == GRB.OPTIMAL:
+        print(max_shift.x, min_shift.x, day)
         return lmao.x.astype(int),obj.getValue()
     else: return -1
     
@@ -174,6 +175,7 @@ def solve_a():
             shift_count[ppl,1] += res[:,2,ppl,:].sum()
     print(np.array(result).shape)
     print(shift_count)
+    print(n_worker)
     plt.plot(np.array(result))
     plt.show()
 
@@ -181,6 +183,7 @@ def solve_b():
     global chosen
     global day_left
     global datapack
+    global shift_count
     nightWorker = []
     if datapack == 1: f = open("result_data_1_part_b.txt","w")
     else: f = open("result_data_2_part_b.txt","w")
@@ -211,6 +214,7 @@ def solve_b():
                 day_left[ppl] -= 1
 
     shift_count = np.zeros((n_worker,2))
+    day_left = np.array([24 for i in range(n_worker)])
     nightWorker = []
     for day in range(1,29):
         res = ScheduleDay(nightWorker=nightWorker,day=day,prob=2,stage=2)
