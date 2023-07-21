@@ -15,7 +15,7 @@ int s, t, n, m, trace[N], f[N][N], sizeee;
 int ava[4][4];
 int ablework[N];
 int num_Conveyor; 
-pair<int, int> NS[N];
+pair<int, int> NS[N];   
 queue<int> query, mem;
 bool findPath(vector< vector<int> > c, int source, int sink)
 {
@@ -53,7 +53,7 @@ void incFlow(vector< vector<int> > c, int source, int sink)
 }
 void readfile(vector< vector<int> >& c)
 {
-    freopen("input.txt", "r", stdin);
+    freopen("Flow_FormattedInput.txt", "r", stdin);
     freopen("result_data_1_part_a.txt", "w", stdout);
     c.assign(N, vector<int>(N));
     cin >> n; // số nhân lực
@@ -198,7 +198,7 @@ int main()
         NS[i].workday = 24;
         NS[i].night = 0;
     }
-    for (int day = 1; day <= 3; day++) // check
+    for (int day = 1; day <= 28; day++) // check
     {
         update(c);
         solve(c);
