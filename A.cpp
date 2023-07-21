@@ -3,17 +3,20 @@
 #include <cstdio>
 #include <cstring> 
 #include <vector>
+#include <iomanip>
 #define workday first
 #define night second
 #define id second.second
 #define mp make_pair
 using namespace std;
-using pipii = pair<int, pair<int, int> >;
-const int N = 250;
-int s, t, n, m, trace[N], c[N][N], f[N][N], sizeee;
+typedef pair<int, pair<int, int> > pipii;
+const int N = 2000;
+int s, t, n, m, trace[N], f[N][N], sizeee;
+int ava[4][4];
+int num_Conveyor; 
 pair<int, int> NS[N];
 queue<int> query, mem;
-bool findPath(int source, int sink)
+bool findPath(vector< vector<int> > c, int source, int sink)
 {
     priority_queue<pipii> q;
     for (int i = 0; i <=sizeee; i++)
@@ -36,7 +39,7 @@ bool findPath(int source, int sink)
     }
     return false;
 }
-void incFlow(int source, int sink)
+void incFlow(vector< vector<int> > c, int source, int sink)
 {
     int delta, u, v;
     for (v = sink; v != source; v = trace[v])
@@ -47,21 +50,34 @@ void incFlow(int source, int sink)
 		f[v][trace[v]]-=delta;
     }
 }
-void readfile()
+void readfile(vector< vector<int> >& c)
 {
     freopen("input.txt", "r", stdin);
     freopen("result_data_1_part_a.txt", "w", stdout);
+    c.assign(N, vector<int>(N));
     cin >> n; // số nhân lực
-    int num_Conveyor; cin >> num_Conveyor; // số băng chuyền 
-    while (num_Conveyor--)
+    cin >> num_Conveyor; // số băng chuyền 
+    for (int i = 0; i < num_Conveyor; i++)
     {
-        
-
-
+        for(int skill = 0; skill < 3; skill++)
+        {
+            int num; cin >> num;
+            while (num--)
+            {
+                int emp; cin >> emp;
+                for (int y = 1; y <= 3; y++)
+                    c[n + 3*(emp-1) + y][4*n + 9*i + skill*3 + y] = 1;
+            }
+        }
     }
+    for (int i = 0; i < num_Conveyor; i++)
+        for (int j = 0; j < 3; j++)
+            cin >> ava[i][j];
     s = 0;
+    t = 4*n + 9 * num_Conveyor + 1;
+    sizeee = t;
 }
-void update()
+void update(vector< vector<int> >& c)
 {
     while (!mem.empty())
     {
@@ -83,24 +99,26 @@ string itos(int i)
     {
         ans = char((i%10)+48) + ans;
         i /= 10;
-    }
+    }    
+    if (ans.size() == 1)
+        ans = '0' + ans;
     return ans;
 }
 // skill: 1:ROT, 2: MĐH, 3: pallet
 void print_answer(int d)
 {
     string cday = itos(d);
-    if (cday.size() == 1)
-        cday = '0' + cday;
+
+    // ------------------
     queue<int> q;
     for (int i = 1; i <= n; i++)
     {
-        if (f[s][i] > 0)
+        if (f[s][i] == 1)
             q.push(i);
     }
     while (!q.empty())
     {
-        cout << cday + ".06.2023 Ca";
+        cout << cday + ".06.2023 Ca_";
         int i = q.front();
         int x, y;
         for (y = 1; y <=3; y++)
@@ -115,23 +133,16 @@ void print_answer(int d)
             query.push(i);
         } 
         cout << y
-             << " Day_chuyen_";
-        int k;
-        for (y = 1; y <= 3; y++)
-        {
-            k = 3*n + y;
-            if (f[x][k] > 0)
+             << " V" + itos(i) + " "
+             << "Day_chuyen_";
+        //--------------------
+        int z;
+        for (z = y; z < t; z += 3)
+            if (f[x][4*n+z] > 0)
                 break;
-        }
-        cout << y
-             << " ";
-        int tmp;
-        for (y = 1; y <= 3; y++)
-        {
-            tmp = 3*n + 3 + y;
-            if (f[k][tmp] > 0)
-                break;
-        }
+        cout << (z+8)/9
+             << ' ';
+        y = (z+2)/3;
         string congviec = (y == 1) ? "Rot": (y == 2) ? "May_dong_hop": "Pallet";
         cout << congviec
              << '\n';
@@ -139,22 +150,68 @@ void print_answer(int d)
     }
 
 }
+void solve(vector< vector<int> > c)
+{
+    for (int i = 0; i <=sizeee; i++)
+        for (int j = 0; j <= sizeee; j++)
+            f[i][j] = 0;
+    for (int i = 0; i < num_Conveyor; i++)
+    {
+        int num; cin >> num; 
+        while (num--)
+        {
+            int shift; cin >> shift;
+            for (int skill = 0; skill < 3; skill++)
+                for (int j = 4*n+shift; j < sizeee; j += 3)
+                    c[j][t] = ava[i][skill];
+        }
+    }
+    for (int i = 0; i < num_Conveyor; i++)
+        for (int j = 0; j < 3; j++)
+            cout << ava[i][j] << ' ';
+    cout << '\n';
+    while(findPath(c,s,t))
+        incFlow(c,s,t);
+    for (int i = 0; i <= sizeee; i++)
+    {
+        for (int j = 0; j <= sizeee; j++)
+            cout << f[i][j] << ' ';
+        cout << '\n';
+    }
+}
 int main()
 {
+    time_t a = clock(), b;
     ios_base::sync_with_stdio(0);
     cin.tie(0); cout.tie(0);
-    readfile();
-    for (int i = 1; i <= sizeee; i++)
+    vector< vector<int> > c; 
+    readfile(c);
+    for (int i = 1; i <= n; i++)
+    {
+        c[s][i] = 1;
+        NS[i].workday = 24;
+        NS[i].night = 0;
+        for (int y = 1; y <= 3; y++)
+            c[i][n+3*(i-1)+y] = 1;
+    }
+    for (int i = n+1; i <= sizeee; i++)
     {
         NS[i].workday = 24;
         NS[i].night = 0;
     }
-    for (int day = 1; day <= 28; day++)
+    for (int day = 1; day <= 3; day++) // check
     {
-        update();
-        while(findPath(s,t))
-            incFlow(s,t);
+        update(c);
+        solve(c);
         print_answer(day);
-    }    
-
+    }   
+    b = clock(); 
+    // for (int i = 0; i <= sizeee; i++)
+    // {
+    //     for (int j = 0; j <= sizeee; j++)
+    //         cout << c[i][j] << ' ';
+    //     cout << '\n';
+    // }
+    double time = (b - a)*1.0/ CLOCKS_PER_SEC;
+    cout << setprecision(3) << fixed << time;
 }
