@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 N_CHAIN, N_SHIFT, N_SKILL = 3,3,3
 WEIGHT = [0.09,0.24,0.67]
 
-datapack = 1
+datapack = 2
 
 skill = []
 timetable = []
@@ -102,10 +102,10 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
                 model.addConstr(lmao[chain,:,ppl,sk].sum() <= skill[chain,ppl,sk]) # Nhân sự làm đúng kĩ năng
 
     model.addConstrs(lmao[:,:,ppl,:].sum() <= 1 for ppl in range(n_worker)) # Mỗi ngày làm 1 việc 1 ca 1 dây chuyền
-    model.addConstrs(lmao[:,0,ppl,:].sum() <= 0 for ppl in range(nightWorker)) # Làm ca 3 hôm trước ko làm ca 1 hôm sau
+    model.addConstrs(lmao[:,0,ppl,:].sum() <= 0 for ppl in nightWorker) # Làm ca 3 hôm trước ko làm ca 1 hôm sau
 
     if (prob == 2):
-        model.addConstrs(day_left[ppl] - lmao[:,:,ppl,:].sum() >= 0 for ppl in nightWorker)
+        model.addConstrs(day_left[ppl] - lmao[:,:,ppl,:].sum() >= 0 for ppl in range(n_worker))
     
     if (prob == 2 and stage == 2):
         model.addConstrs(lmao[:,:,ppl,:] <= chosen[ppl] for ppl in range(n_worker))
@@ -118,14 +118,13 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
         obj = 0
         for id1 in range(n_worker):
             for id2 in range(id1,n_worker):
-
                 obj = obj + (balance_arr[id1] - balance_arr[id2]) * (balance_arr[id1] - balance_arr[id2])
             obj = obj / num_of_pair
 
         model.setObjective(obj,sense = GRB.MINIMIZE)
     else:
-        obj = sum([WEIGHT[chosen[ppl] + lmao[:,:,ppl,:].sum()] for ppl in range(n_worker)])
-        model.setObjective(obj,sense = GRB.MINIMIZE)
+        obj = sum([(chosen[ppl] + lmao[:,:,ppl,:].sum() + 1) for ppl in range(n_worker)])
+        model.setObjective(obj,sense = GRB.MAXIMIZE)
 
     model.optimize()
 
@@ -143,7 +142,11 @@ def solve_a():
     else: f = open("result_data_2_part_a.txt","w")
     result = []
     for day in range(1,29):
-        res,obj = ScheduleDay(nightWorker=nightWorker,day=day,prob=1)
+        res = ScheduleDay(nightWorker=nightWorker,day=day,prob=1)
+        if res == -1:
+            print("Falled\n")
+            break
+        res,obj = res
         for chain in range(N_CHAIN):
             for shift in range(N_SHIFT):
                 for sk in range(N_SKILL):
@@ -166,11 +169,15 @@ def solve_a():
 def solve_b():
     global datapack
     nightWorker = []
-    if datapack == 1: f = open("result_data_1_part_a.txt","w")
-    else: f = open("result_data_2_part_a.txt","w")
+    if datapack == 1: f = open("result_data_1_part_b.txt","w")
+    else: f = open("result_data_2_part_b.txt","w")
     result = []
     for day in range(1,29):
-        res,obj = ScheduleDay(nightWorker=nightWorker, day=day, prob=2, stage=1)
+        res = ScheduleDay(nightWorker=nightWorker,day=day,prob=2,stage=1)
+        if res == -1:
+            print("Falled\n")
+            break
+        res,obj = res
         for chain in range(N_CHAIN):
             for shift in range(N_SHIFT):
                 for sk in range(N_SKILL):
@@ -186,8 +193,11 @@ def solve_b():
             if res[:,:,ppl,:].sum() == 1:
                 chosen[ppl] = 1
                 day_left[ppl] -= 1
+    print(chosen.nonzero())
+    print(day_left)
         
 
 
 if __name__ == "__main__":
-    solve_a()
+    # solve_a()
+    solve_b()
