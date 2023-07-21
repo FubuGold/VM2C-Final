@@ -174,7 +174,7 @@ class Readfile:
 
 def test():
     Reader = Readfile()
-    Reader.readDatasetFlow(datapack=1)
+    Reader.readDatasetFlow(datapack=2)
         
 
 if __name__ == '__main__':
