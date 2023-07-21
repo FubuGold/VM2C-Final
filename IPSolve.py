@@ -1,10 +1,5 @@
-import FormatInput
-import numpy as np
 import gurobipy as gp  # import the installed package
 from gurobipy import GRB
-
-# --------------------------------
-# Create model
 params = {
 "WLSACCESSID": 'f164f691-1d84-4092-a810-e324efa273f0',
 "WLSSECRET": '52be21e1-ad4a-439a-9963-1d8af268ab0e',
@@ -77,9 +72,8 @@ def ScheduleDay(prevSchedule):
     
 def test():
     prevSchedule = np.zeros((3,3,17,3))
-    return ScheduleDay(prevSchedule=prevSchedule)
+    print(ScheduleDay(prevSchedule=prevSchedule))
 
 if __name__ == "__main__":
-    schedule = test()
-    print(schedule.shape)
-    ...  
+    test()
+    ...
