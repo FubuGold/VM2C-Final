@@ -101,8 +101,49 @@ class Readfile:
             for k,v in hash_table.items():
                 f.write(f"{k} {v}\n")
 
-    def readDatasetFlow(self):...
-    def printInputFlow(self):...
+    def readDatasetFlow(self,datapack):
+        if datapack == 1:
+            num_folds = 1
+            data_path = r"duLieu1"
+        else:
+            num_folds = 3
+            data_path = r"duLieu2"
+        staff = pd.read_csv(f"VM2C/{data_path}/01_nhan_su.txt", sep=" ")
+        code_to_id = dict(zip(staff["ma_nhan_su"], staff["so_thu_tu"]) )
+        id_to_code = dict(zip(staff["so_thu_tu"], staff["ma_nhan_su"]) )
+        with open("Flow_FormattedInput.txt","w") as f :  
+            f.write(f"{len(staff)}\n")
+            f.write(f"{num_folds}\n")        
+            for i in range(num_folds): 
+                x = np.loadtxt(f"VM2C/{data_path}/ky_nang_Day_chuyen_{i+1}_Rot.txt",dtype ="str")
+                f.write(str(len(x)) + ' ')
+                for c in x:
+                    if c[1] == '0':
+                        f.write(c[2] + ' ')
+                    else:
+                        f.write(c[1:] + ' ')
+                f.write('\n')  
+                x = np.loadtxt(f"VM2C/{data_path}/ky_nang_Day_chuyen_{i+1}_May_dong_hop.txt",dtype ="str")
+                f.write(str(len(x)) + ' ')
+                for c in x:
+                    if c[1] == '0':
+                        f.write(c[2] + ' ')
+                    else:
+                        f.write(c[1:] + ' ')
+                f.write('\n')  
+                x = np.loadtxt(f"VM2C/{data_path}/ky_nang_Day_chuyen_{i+1}_Pallet.txt",dtype ="str")
+                f.write(str(len(x)) + ' ')
+                for c in x:
+                    if c[1] == '0':
+                        f.write(c[2] + ' ')
+                    else:
+                        f.write(c[1:] + ' ')
+                f.write('\n')  
+            
+            with open(f"VM2C/{data_path}/02_dinh_bien.txt", "r") as finp:
+                z = finp.readlines()
+                for i in z:
+                    f.write(i.split()[2] + '\n') 
 
 def test():
     Reader = Readfile()
