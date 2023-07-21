@@ -145,9 +145,38 @@ class Readfile:
                 for i in z:
                     f.write(i.split()[2] + '\n') 
 
+            timetable = np.zeros( (29,3,3) ,dtype = int)
+            for i in range(num_folds):
+                with open(f"VM2C/{data_path}/lenh_san_xuat_Day_chuyen_{i+1}.txt","r") as finp:
+                    com = finp.readlines()
+                    for time in com:
+                        time = time.split()
+                        if len(time) != 4: continue
+                        day = int(time[0][-2:])
+                        next_day = int(time[2][-2:])
+                        if time[1] < "06:00:00":
+                            timetable[day-1][i][2] = 1
+                        if time[1] <= "14:00:00" and time[1] >= "06:00:00":
+                            timetable[day][i][0] = 1
+                        if next_day > day or time[3] > "22:00:00":
+                            timetable[day][i][2] = 1
+                        if time[1] <= "22:00:00" and time[1] > "14:00:00":
+                            timetable[day][i][1] = 1
+
+            for i in range(1,29):
+                for j in range(num_folds):
+                    tmp = [x+1 for x in range(3) if timetable[i][j][x]]
+                    f.write(str(len(tmp)) + ' ')
+                    for z in tmp:
+                        f.write(str(z) + ' ')
+                    f.write('\n')  
+
+
+        
+
 def test():
     Reader = Readfile()
-    Reader.PrintInputIP(datapack=2)
+    Reader.readDatasetFlow(datapack=1)
         
 
 if __name__ == '__main__':
