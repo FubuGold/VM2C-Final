@@ -5,11 +5,10 @@ class Readfile:
     daychuyen_code_to_id = {'Day_chuyen_1' : 0, 'Day_chuyen_2' : 1,'Day_chuyen_3' : 2}
     skill_to_id = {"Rot" : 0, "May_dong_hop" : 1, "Pallet" : 2}
     
-
     def __init__(self):
         pass
 
-    def readDataset(self,datapack):
+    def readDatasetIP(self,datapack):
         if datapack == 1:
             num_folds = 1
             data_path = r"duLieu1"
@@ -73,8 +72,8 @@ class Readfile:
 
         return (id_to_code, skill, timetable, chain_need)
         
-    def PrintInput(self,datapack):
-        hash_table, skill, timetable, chain_need = self.readDataset(datapack=datapack)
+    def printInputIP(self,datapack):
+        hash_table, skill, timetable, chain_need = self.readDatasetIP(datapack=datapack)
         with open("FormattedInput.txt","w") as f:
             f.write(str(len(hash_table)) + '\n')
 
@@ -101,10 +100,14 @@ class Readfile:
             for k,v in hash_table.items():
                 f.write(f"{k} {v}\n")
 
+    def readDatasetFlow(self):...
+    def printInputFlow(self):...
+
 def test():
     Reader = Readfile()
-    Reader.PrintInput(datapack=2)
+    Reader.PrintInputIP(datapack=2)
         
 
 if __name__ == '__main__':
-    test()
+    # test()
+    ...
