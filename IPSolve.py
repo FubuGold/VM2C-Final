@@ -77,8 +77,9 @@ def ScheduleDay(prevSchedule):
     
 def test():
     prevSchedule = np.zeros((3,3,17,3))
-    print(ScheduleDay(prevSchedule=prevSchedule))
+    return ScheduleDay(prevSchedule=prevSchedule)
 
 if __name__ == "__main__":
-    test()
-    ...
+    schedule = test()
+    print(schedule.shape)
+    ...  

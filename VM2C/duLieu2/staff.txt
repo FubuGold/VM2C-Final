@@ -1,4 +1,4 @@
-# so_thu_tu ma_nhan_su
+so_thu_tu ma_nhan_su
 1 V01
 2 V02
 3 V03
