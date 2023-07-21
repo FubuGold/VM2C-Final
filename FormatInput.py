@@ -67,9 +67,9 @@ class Readfile:
             for x in temp:
                 chain_need[int(x[0][-1])-1].append(int(x[2]))
         
-        if chain_need[0] == []: chain_need[0] = np.zeros((3))
-        if chain_need[1] == []: chain_need[1] = np.zeros((3))
-        if chain_need[2] == []: chain_need[2] = np.zeros((3))
+        if chain_need[0] == []: chain_need[0] = np.zeros((3),dtype=int)
+        if chain_need[1] == []: chain_need[1] = np.zeros((3),dtype=int)
+        if chain_need[2] == []: chain_need[2] = np.zeros((3),dtype=int)
 
         return (id_to_code, skill, timetable, chain_need)
         
@@ -100,6 +100,7 @@ class Readfile:
 
             for k,v in hash_table.items():
                 f.write(f"{k} {v}\n")
+
     def readDatasetFlow(self,datapack):
         if datapack == 1:
             num_folds = 1
@@ -110,7 +111,6 @@ class Readfile:
         staff = pd.read_csv(f"VM2C/{data_path}/01_nhan_su.txt", sep=" ")
         code_to_id = dict(zip(staff["ma_nhan_su"], staff["so_thu_tu"]) )
         id_to_code = dict(zip(staff["so_thu_tu"], staff["ma_nhan_su"]) )
-
         with open("Flow_FormattedInput.txt","w") as f :  
             f.write(f"{len(staff)}\n")
             f.write(f"{num_folds}\n")        
@@ -147,9 +147,9 @@ class Readfile:
        
 def test():
     Reader = Readfile()
-    # Reader.printInputIP(datapack=2)
-    Reader.readDatasetFlow(datapack = 2)  
-    
+    Reader.PrintInputIP(datapack=2)
+        
+
 if __name__ == '__main__':
     test()
     
