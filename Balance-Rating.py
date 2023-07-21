@@ -1,5 +1,6 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
+import statistics as stats
 def Load_Result(data_path): 
     n = 0 
     if(data_path == 2) : 
@@ -25,8 +26,9 @@ def Balance(balance) :
         value.append(balance[i][0] + balance[i][1])
       return value
 if __name__ == "__main__": 
-    Load_Result(2)
-    balance = np.loadtxt("Balance_Result_2_part_a")
+    Load_Result(1)
+    balance = np.loadtxt("Balance_Result_1_part_a")
     value = Balance(balance)
     plt.hist(value)
     plt.show()
+    print(stats.stdev(value))

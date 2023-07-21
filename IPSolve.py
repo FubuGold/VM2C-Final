@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 N_CHAIN, N_SHIFT, N_SKILL = 3,3,3
 WEIGHT = [0.09,0.24,0.67]
 
-datapack = 2
+datapack = 1
 
 skill = []
 timetable = []
@@ -79,6 +79,7 @@ day_left = np.array([24 for i in range(n_worker)])
 # --------------------------------
 # Create function
 def balance(day,night,worker):
+    global shift_count
     return day + shift_count[worker,0] + (night + shift_count[worker,1]) * 1.2
 
 # --------------------------------
@@ -108,22 +109,23 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
         model.addConstrs(day_left[ppl] - lmao[:,:,ppl,:].sum() >= 0 for ppl in range(n_worker))
     
     if (prob == 2 and stage == 2):
-        model.addConstrs(lmao[:,:,ppl,:] <= chosen[ppl] for ppl in range(n_worker))
+        model.addConstrs(lmao[:,:,ppl,:].sum() <= chosen[ppl] for ppl in range(n_worker))
         
 
     # Set objective
     if (prob == 1) or (prob == 2 and stage == 2):
-        balance_arr = [balance(lmao[:,:2,ppl,:].sum(),lmao[:,2,ppl,:].sum(),ppl) for ppl in range(n_worker)]
+        # balance_arr = [balance(lmao[:,:2,ppl,:].sum(),lmao[:,2,ppl,:].sum(),ppl) for ppl in range(n_worker)]
+        balance_arr = [lmao[:,:,ppl,:].sum() + shift_count[ppl,:].sum() for ppl in range(n_worker)]
         num_of_pair = int((n_worker / 2) * (n_worker - 1))
         obj = 0
         for id1 in range(n_worker):
             for id2 in range(id1,n_worker):
                 obj = obj + (balance_arr[id1] - balance_arr[id2]) * (balance_arr[id1] - balance_arr[id2])
             obj = obj / num_of_pair
-
+        
         model.setObjective(obj,sense = GRB.MINIMIZE)
     else:
-        obj = sum([(chosen[ppl] + lmao[:,:,ppl,:].sum() + 1) for ppl in range(n_worker)])
+        obj = sum([(chosen[ppl] + lmao[:,:,ppl,:].sum()+1)*(chosen[ppl] + lmao[:,:,ppl,:].sum()+1) for ppl in range(n_worker)])
         model.setObjective(obj,sense = GRB.MAXIMIZE)
 
     model.optimize()
@@ -137,12 +139,14 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
     
 def solve_a():
     global datapack
-    nightWorker = np.zeros((3,3,n_worker,3))
+    global shift_count
     if datapack == 1: f = open("result_data_1_part_a.txt","w")
     else: f = open("result_data_2_part_a.txt","w")
     result = []
+    nightWorker = []
     for day in range(1,29):
         res = ScheduleDay(nightWorker=nightWorker,day=day,prob=1)
+        nightWorker = []
         if res == -1:
             print("Falled\n")
             break
@@ -152,21 +156,25 @@ def solve_a():
                 for sk in range(N_SKILL):
                     for ppl in range(n_worker):
                         if res[chain,shift,ppl,sk]:
-                            if (shift == 2):
-                                nightWorker.append(ppl)
                             tmp = str(day)
                             if len(tmp) == 1: tmp = "0" + tmp
                             f.write(f"{tmp}.06.2023 Ca_{shift+1} {id_to_code[ppl]} Day_chuyen_{chain+1} {id_to_skill[sk]}\n")
-        nightWorker = list(set(nightWorker))
+        for ppl in range(n_worker):
+            if res[:,2,ppl,:].sum() == 1:
+                nightWorker.append(ppl)
+        
         result.append(obj)         
         for ppl in range(n_worker):
             shift_count[ppl,0] += res[:,:2,ppl,:].sum()
             shift_count[ppl,1] += res[:,2,ppl,:].sum()
     print(np.array(result).shape)
+    print(shift_count)
     plt.plot(np.array(result))
     plt.show()
 
 def solve_b():
+    global chosen
+    global day_left
     global datapack
     nightWorker = []
     if datapack == 1: f = open("result_data_1_part_b.txt","w")
@@ -174,30 +182,66 @@ def solve_b():
     result = []
     for day in range(1,29):
         res = ScheduleDay(nightWorker=nightWorker,day=day,prob=2,stage=1)
+        nightWorker = []
         if res == -1:
-            print("Falled\n")
+            print(f"Falled {day}\n")
             break
         res,obj = res
-        for chain in range(N_CHAIN):
-            for shift in range(N_SHIFT):
-                for sk in range(N_SKILL):
-                    for ppl in range(n_worker):
-                        if res[chain,shift,ppl,sk]:
-                            if (shift == 2):
-                                nightWorker.append(ppl)
-                            tmp = str(day)
-                            if len(tmp) == 1: tmp = "0" + tmp
-                            f.write(f"{tmp}.06.2023 Ca_{shift+1} {id_to_code[ppl]} Day_chuyen_{chain+1} {id_to_skill[sk]}\n")
-        nightWorker = list(set(nightWorker))
+        # print(obj)
+        # for chain in range(N_CHAIN):
+        #     for shift in range(N_SHIFT):
+        #         for sk in range(N_SKILL):
+        #             for ppl in range(n_worker):
+        #                 if res[chain,shift,ppl,sk]:
+        #                     tmp = str(day)
+        #                     if len(tmp) == 1: tmp = "0" + tmp
+        #                     f.write(f"{tmp}.06.2023 Ca_{shift+1} {id_to_code[ppl]} Day_chuyen_{chain+1} {id_to_skill[sk]}\n")
+        for ppl in range(n_worker):
+            if res[:,2,ppl,:].sum() == 1:
+                nightWorker.append(ppl)
+        
         for ppl in range(n_worker):
             if res[:,:,ppl,:].sum() == 1:
                 chosen[ppl] = 1
                 day_left[ppl] -= 1
-    print(chosen.nonzero())
-    print(day_left)
+
+    shift_count = np.zeros((n_worker,2))
+    nightWorker = []
+    for day in range(1,29):
+        res = ScheduleDay(nightWorker=nightWorker,day=day,prob=2,stage=2)
+        nightWorker = []
+        if res == -1:
+            print(f"Falled {day}\n")
+            break
+        res,obj = res
+        # print(obj)
+        # for chain in range(N_CHAIN):
+        #     for shift in range(N_SHIFT):
+        #         for sk in range(N_SKILL):
+        #             for ppl in range(n_worker):
+        #                 if res[chain,shift,ppl,sk]:
+        #                     tmp = str(day)
+        #                     if len(tmp) == 1: tmp = "0" + tmp
+        #                     f.write(f"{tmp}.06.2023 Ca_{shift+1} {id_to_code[ppl]} Day_chuyen_{chain+1} {id_to_skill[sk]}\n")
+        for ppl in range(n_worker):
+            if res[:,2,ppl,:].sum() == 1:
+                nightWorker.append(ppl)
+        result.append(obj)
+        for ppl in range(n_worker):
+            shift_count[ppl,0] += res[:,:2,ppl,:].sum()
+            shift_count[ppl,1] += res[:,2,ppl,:].sum()
+
+    print(np.array(result).shape)
+    print(shift_count)
+    plt.plot(np.array(result))
+    plt.show()
+
+        
+    # print(chosen.nonzero())
+    # print(np.array(list(range(55)))[day_left == 24])
         
 
 
 if __name__ == "__main__":
-    # solve_a()
-    solve_b()
+    solve_a()
+    # solve_b()
