@@ -1,3 +1,4 @@
+import numpy as np
 import gurobipy as gp  # import the installed package
 from gurobipy import GRB
 
@@ -19,7 +20,9 @@ env = gp.Env(params=params)
 skill = []
 timetable = []
 chain_need = []
+
 id_to_code = {}
+id_to_skill = {0 : "Rot", 1 : "May_dong_hop", 2 : "Pallet"}
 # Rot - May_dong_hop - Pallet
 with open("FormattedInput.txt","r") as f:
     n_worker = int(f.readline().split()[0])
@@ -66,7 +69,7 @@ def ScheduleDay(prevSchedule,day):
     for chain in range(N_CHAIN):
         for sk in range(N_SKILL):
             for shift in range(N_SHIFT):
-                model.addConstr(lmao[chain,shift,:,sk].sum() == chain_need[chain,sk])
+                model.addConstr(lmao[chain,shift,:,sk].sum() == chain_need[chain,sk]) # 
         for ppl in range(n_worker):
             for sk in range(N_SKILL):
                 model.addConstr(lmao[chain,:,ppl,sk].sum() <= skill[chain,ppl,sk])
@@ -84,6 +87,7 @@ def ScheduleDay(prevSchedule,day):
     
 def main():
     prevSchedule = np.zeros((3,3,17,3))
+    f = open("result_data_1_part_a.txt","w")
     day = 1
     res = ScheduleDay(prevSchedule=prevSchedule,day=day)
     for chain in range(N_CHAIN):
@@ -91,7 +95,11 @@ def main():
             for sk in range(N_SKILL):
                 for ppl in range(n_worker):
                     if res[chain,shift,ppl,sk]: 
-                        ...
+                        tmp = str(day)
+                        if len(tmp) == 1: tmp = "0" + tmp
+                        f.write(f"{tmp}.06.2023 Ca_{shift+1} {id_to_code[ppl]} Day_chuyen_{chain+1} {sk}")
+    f.close()
+                        
                         
 
 if __name__ == "__main__":

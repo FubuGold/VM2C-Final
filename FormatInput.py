@@ -13,8 +13,8 @@ class Readfile:
     def readDataset1(self):
         data_path_1 = r"duLieu1"
         data_path_2 = r"duLieu2"
-        num_folds = 3 
-        data_path = data_path_2
+        num_folds = 1
+        data_path = data_path_1
         
         timetable = np.zeros( (29,3,3) ,dtype = int)
                                 # Ngay Day-Chuyen Ca
@@ -92,9 +92,9 @@ class Readfile:
                         f.write(str(val) + ' ')
                     f.write('\n')
                 f.write('\n')
-    
-    def readDataset2(self):
-        ...
+
+            for k,v in hash_table.items():
+                f.write(f"{k} {v}\n")
 
 def test():
     Reader = Readfile()
