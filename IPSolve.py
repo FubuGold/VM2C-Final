@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # Create constant, variable
 N_CHAIN, N_SHIFT, N_SKILL = 3,3,3
 
-datapack = 2
+datapack = 1
 
 skill = []
 timetable = []

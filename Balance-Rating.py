@@ -38,7 +38,7 @@ def Balance(balance) :
 if __name__ == "__main__":
     part = "b"
     method = "IP"
-    datapack = 2
+    datapack = 1
     Load_Result(datapack,part = part,method = method)
     balance = np.loadtxt(f"Balance_result_{datapack}_part_{part}_{method}")
     balance = balance[~(balance == 0).all(axis=1)]
