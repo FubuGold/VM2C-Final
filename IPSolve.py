@@ -24,7 +24,7 @@ def createInput():
     global datapack
     reader = FormatInput.Readfile()
     reader.printInputIP(datapack=datapack)
-createInput() # Comment nếu đã tạo. Chạy nếu thay đổi dataset
+# createInput() # Comment nếu đã tạo. Chạy nếu thay đổi dataset
 
 # --------------------------------
 # Create model
@@ -138,7 +138,7 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
         
         model.setObjective(obj,sense = GRB.MINIMIZE)
     else:
-        obj = sum([(chosen[ppl] + lmao[:,:,ppl,:].sum()+1)*(chosen[ppl] + lmao[:,:,ppl,:].sum()+1) for ppl in range(n_worker)])
+        obj = sum([(chosen[ppl] + lmao[:,:,ppl,:].sum())*(chosen[ppl] + lmao[:,:,ppl,:].sum()) for ppl in range(n_worker)])
         model.setObjective(obj,sense = GRB.MAXIMIZE)
 
     model.optimize()
@@ -188,7 +188,6 @@ def solve_a():
 
 def solve_b():
     global chosen
-    global day_left
     global datapack
     global shift_count
     nightWorker = []
@@ -209,10 +208,9 @@ def solve_b():
         for ppl in range(n_worker):
             if res[:,:,ppl,:].sum() == 1:
                 chosen[ppl] = 1
-                day_left[ppl] -= 1
+                shift_count[ppl,0] += 1
 
     shift_count = np.zeros((n_worker,2))
-    day_left = np.array([24 for i in range(n_worker)])
     nightWorker = []
     for day in range(1,29):
         res = ScheduleDay(nightWorker=nightWorker,day=day,prob=2,stage=2)
@@ -237,7 +235,6 @@ def solve_b():
         for ppl in range(n_worker):
             if res[:,:,ppl,:].sum() == 1:
                 chosen[ppl] = 1
-                day_left[ppl] -= 1
     
         for ppl in range(n_worker):
             shift_count[ppl,0] += res[:,:2,ppl,:].sum()
