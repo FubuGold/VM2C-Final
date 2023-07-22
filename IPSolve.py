@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # Create constant, variable
 N_CHAIN, N_SHIFT, N_SKILL = 3,3,3
 
-datapack = 1
+datapack = 2
 
 skill = []
 timetable = []
@@ -24,7 +24,7 @@ def createInput():
     global datapack
     reader = FormatInput.Readfile()
     reader.printInputIP(datapack=datapack)
-# createInput() # Comment nếu đã tạo. Chạy nếu thay đổi dataset
+createInput() # Comment nếu đã tạo. Chạy nếu thay đổi dataset
 
 # --------------------------------
 # Create model
@@ -185,6 +185,7 @@ def solve_a():
     print(n_worker)
     plt.plot(np.array(result))
     plt.show()
+    f.close()
 
 def solve_b():
     global chosen
@@ -245,12 +246,12 @@ def solve_b():
     plt.plot(np.array(result))
     plt.show()
 
-        
+    f.close()
     # print(chosen.nonzero())
     # print(np.array(list(range(55)))[day_left == 24])
         
 
 
 if __name__ == "__main__":
-    # solve_a()
+    solve_a()
     solve_b()
