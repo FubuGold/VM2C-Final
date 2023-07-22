@@ -67,18 +67,12 @@ with open("FormattedInput.txt","r") as f:
 skill = np.array(skill) # Chain - Worker - Skill
 timetable = np.array(timetable) # Day - Chain - Shift
 chain_need = np.array(chain_need) # Chain - Skill
-shift_count = np.zeros((n_worker,2)) # Worker - Shift (Day - Night)
+shift_count = np.zeros((n_worker,2)) # Worker - Shift (Total - Night)
 chosen = np.zeros((n_worker))
 
 # print(skill)
 # print(timetable)
 # print(chain_need)
-
-# --------------------------------
-# Create function
-def balance(day,night,worker):
-    global shift_count
-    return day + shift_count[worker,0] + (night + shift_count[worker,1]) * 1.2
 
 # --------------------------------
 # Model
@@ -104,7 +98,7 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
     model.addConstrs(lmao[:,0,ppl,:].sum() <= 0 for ppl in nightWorker) # Làm ca 3 hôm trước ko làm ca 1 hôm sau
 
     if (prob == 2):
-        model.addConstrs(lmao[:,:,ppl,:].sum() + shift_count[ppl].sum() <= 24 for ppl in range(n_worker))
+        model.addConstrs(lmao[:,:,ppl,:].sum() + shift_count[ppl,0] <= 24 for ppl in range(n_worker))
     
     if (prob == 2 and stage == 2):
         model.addConstrs(lmao[:,:,ppl,:].sum() <= chosen[ppl] for ppl in range(n_worker))
@@ -121,14 +115,14 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
         if prob == 2:
             for ppl in range(n_worker):
                 if chosen[ppl]:
-                    model.addConstr(lmao[:,:,ppl,:].sum() + shift_count[ppl].sum() <= max_shift)
-                    model.addConstr(lmao[:,:,ppl,:].sum() + shift_count[ppl].sum() >= min_shift)
+                    model.addConstr(lmao[:,:,ppl,:].sum() + shift_count[ppl,0] <= max_shift)
+                    model.addConstr(lmao[:,:,ppl,:].sum() + shift_count[ppl,0] >= min_shift)
 
                     model.addConstr(lmao[:,2,ppl,:].sum() + shift_count[ppl,1] <= max_shift_night)
                     model.addConstr(lmao[:,2,ppl,:].sum() + shift_count[ppl,1] >= min_shift_night)
         else:
-            model.addConstrs(lmao[:,:,ppl,:].sum() + shift_count[ppl].sum() <= max_shift for ppl in range(n_worker))
-            model.addConstrs(lmao[:,:,ppl,:].sum() + shift_count[ppl].sum() >= min_shift for ppl in range(n_worker))
+            model.addConstrs(lmao[:,:,ppl,:].sum() + shift_count[ppl,0] <= max_shift for ppl in range(n_worker))
+            model.addConstrs(lmao[:,:,ppl,:].sum() + shift_count[ppl,0] >= min_shift for ppl in range(n_worker))
 
             model.addConstrs(lmao[:,2,ppl,:].sum() + shift_count[ppl,1] <= max_shift_night for ppl in range(n_worker))
             model.addConstrs(lmao[:,2,ppl,:].sum() + shift_count[ppl,1] >= min_shift_night for ppl in range(n_worker))
@@ -153,6 +147,7 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
 def solve_a():
     global datapack
     global shift_count
+    shift_count = np.zeros((n_worker,2))
     if datapack == 1: f = open("result_data_1_part_a.txt","w")
     else: f = open("result_data_2_part_a.txt","w")
     result = []
@@ -178,7 +173,7 @@ def solve_a():
         
         result.append(obj)         
         for ppl in range(n_worker):
-            shift_count[ppl,0] += res[:,:2,ppl,:].sum()
+            shift_count[ppl,0] += res[:,:,ppl,:].sum()
             shift_count[ppl,1] += res[:,2,ppl,:].sum()
     print(np.array(result).shape)
     print(shift_count)
@@ -209,7 +204,8 @@ def solve_b():
         for ppl in range(n_worker):
             if res[:,:,ppl,:].sum() == 1:
                 chosen[ppl] = 1
-                shift_count[ppl,0] += 1
+            shift_count[ppl,0] += res[:,:,ppl,:].sum()
+            shift_count[ppl,1] += res[:,2,ppl,:].sum()
 
     shift_count = np.zeros((n_worker,2))
     nightWorker = []
@@ -238,7 +234,7 @@ def solve_b():
                 chosen[ppl] = 1
     
         for ppl in range(n_worker):
-            shift_count[ppl,0] += res[:,:2,ppl,:].sum()
+            shift_count[ppl,0] += res[:,:,ppl,:].sum()
             shift_count[ppl,1] += res[:,2,ppl,:].sum()
 
     print(np.array(result).shape)
@@ -253,5 +249,5 @@ def solve_b():
 
 
 if __name__ == "__main__":
-    solve_a()
+    # solve_a()
     solve_b()

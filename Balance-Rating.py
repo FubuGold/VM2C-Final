@@ -36,8 +36,8 @@ def Balance(balance) :
       return value,night_shift
     
 if __name__ == "__main__":
-    part = "a"
-    method = "GRAPH"
+    part = "b"
+    method = "IP"
     datapack = 2
     Load_Result(datapack,part = part,method = method)
     balance = np.loadtxt(f"Balance_result_{datapack}_part_{part}_{method}")
@@ -50,6 +50,8 @@ if __name__ == "__main__":
     plt.plot([], [], ' ', label=f'Total_workers = {len(value)}')
     plt.hist(night_shift,label = f"night_shift \n std_dev = {round(stats.stdev(night_shift),3)}")
     plt.hist(value,label = f"total_shift \n std_dev = {round(stats.stdev(value),3)}")
+    plt.xlabel("shifts")
+    plt.ylabel("workers")
     plt.xticks([i for i in range(30)])
     plt.subplot
     plt.legend()
