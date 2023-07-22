@@ -10,7 +10,10 @@ def Load_Result(data_pack,part,method):
        n = 55
     if(data_pack == 1): 
        n =  17 
-    path = f'result_data_{data_pack}_part_{part}_{method}.txt'  
+    if method == "IP":
+        path = f'result_data_{data_pack}_part_{part}.txt'  
+    else:
+        path = f'result_data_{data_pack}_part_{part}_{method}.txt'  
     check_list = np.zeros((n,2),dtype=int)
     with open(path,"r") as f : 
         z = f.readlines()
@@ -49,7 +52,7 @@ def calculate_standard_deviation(data):
 if __name__ == "__main__":
     part = "a"
     method = "IP"
-    datapack = 2 
+    datapack = 1
     Load_Result(datapack,part = part,method = method)
     balance = np.loadtxt(f"Balance_result_{datapack}_part_{part}_{method}")
     value,night_shift = Balance(balance)

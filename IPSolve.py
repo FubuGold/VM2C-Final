@@ -6,9 +6,8 @@ import matplotlib.pyplot as plt
 # --------------------------------
 # Create constant, variable
 N_CHAIN, N_SHIFT, N_SKILL = 3,3,3
-WEIGHT = [0.09,0.24,0.67]
 
-datapack = 2
+datapack = 1
 
 skill = []
 timetable = []
@@ -70,7 +69,6 @@ timetable = np.array(timetable) # Day - Chain - Shift
 chain_need = np.array(chain_need) # Chain - Skill
 shift_count = np.zeros((n_worker,2)) # Worker - Shift (Day - Night)
 chosen = np.zeros((n_worker))
-day_left = np.array([24 for i in range(n_worker)])
 
 # print(skill)
 # print(timetable)
@@ -106,7 +104,7 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
     model.addConstrs(lmao[:,0,ppl,:].sum() <= 0 for ppl in nightWorker) # Làm ca 3 hôm trước ko làm ca 1 hôm sau
 
     if (prob == 2):
-        model.addConstrs(day_left[ppl] - lmao[:,:,ppl,:].sum() >= 0 for ppl in range(n_worker))
+        model.addConstrs(lmao[:,:,ppl,:].sum() + shift_count[ppl].sum() <= 24 for ppl in range(n_worker))
     
     if (prob == 2 and stage == 2):
         model.addConstrs(lmao[:,:,ppl,:].sum() <= chosen[ppl] for ppl in range(n_worker))
@@ -136,7 +134,7 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
             model.addConstrs(lmao[:,2,ppl,:].sum() + shift_count[ppl,1] >= min_shift_night for ppl in range(n_worker))
         
         # obj = (max_shift - min_shift) * (max_shift_night - min_shift_night)
-        obj =  (lmao[:,:,ppl,:].sum()/n_worker)*(lmao[:,:,ppl,:].sum()/n_worker) +  (max_shift - min_shift) + (max_shift_night - min_shift_night) 
+        obj =  (max_shift - min_shift) * (max_shift - min_shift) + (max_shift_night - min_shift_night) * (max_shift_night - min_shift_night)
         
         model.setObjective(obj,sense = GRB.MINIMIZE)
     else:
@@ -257,5 +255,5 @@ def solve_b():
 
 
 if __name__ == "__main__":
-    # solve_a()
-    solve_b()
+    solve_a()
+    # solve_b()
