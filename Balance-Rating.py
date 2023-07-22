@@ -67,4 +67,6 @@ if __name__ == "__main__":
     plt.xticks([i for i in range(30)])
     plt.subplot
     plt.legend()
+    plt.savefig(f'result_{datapack}_part_{part}_{method}.png')
     plt.show()  
+    
