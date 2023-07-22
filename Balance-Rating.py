@@ -34,24 +34,10 @@ def Balance(balance) :
         value.append(balance[i][0])
         night_shift.append(balance[i][1])
       return value,night_shift
-def calculate_standard_deviation(data):
-    n = len(data)
     
-    mean = sum(data) / n
-    
-    # Step 2: Calculate the squared differences between data points and the mean
-    squared_diff = [(x - mean) ** 2 for x in data]
-    
-    # Step 3: Calculate the mean of the squared differences
-    mean_squared_diff = sum(squared_diff) / n
-    
-    # Step 4: Take the square root to get the standard deviation
-    standard_deviation = mean_squared_diff ** 0.5
-    
-    return standard_deviation
 if __name__ == "__main__":
-    part = "b"
-    method = "IP"
+    part = "a"
+    method = "GRAPH"
     datapack = 2
     Load_Result(datapack,part = part,method = method)
     balance = np.loadtxt(f"Balance_result_{datapack}_part_{part}_{method}")
@@ -62,8 +48,8 @@ if __name__ == "__main__":
     print(stats.stdev(night_shift))
     print(stats.stdev(value))
     plt.plot([], [], ' ', label=f'Total_workers = {len(value)}')
-    plt.hist(night_shift,label = "night_shift")
-    plt.hist(value,label = "total_shift")
+    plt.hist(night_shift,label = f"night_shift \n std_dev = {round(stats.stdev(night_shift),3)}")
+    plt.hist(value,label = f"total_shift \n std_dev = {round(stats.stdev(value),3)}")
     plt.xticks([i for i in range(30)])
     plt.subplot
     plt.legend()
