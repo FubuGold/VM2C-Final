@@ -136,7 +136,7 @@ def ScheduleDay(nightWorker,day,prob,stage = 1):
             model.addConstrs(lmao[:,2,ppl,:].sum() + shift_count[ppl,1] >= min_shift_night for ppl in range(n_worker))
         
         # obj = (max_shift - min_shift) * (max_shift_night - min_shift_night)
-        obj = (max_shift - min_shift) * (max_shift - min_shift) + (max_shift_night - min_shift_night) * (max_shift_night - min_shift_night)
+        obj =  (lmao[:,:,ppl,:].sum()/n_worker)*(lmao[:,:,ppl,:].sum()/n_worker) +  (max_shift - min_shift) + (max_shift_night - min_shift_night) 
         
         model.setObjective(obj,sense = GRB.MINIMIZE)
     else:
