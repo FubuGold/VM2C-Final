@@ -7,7 +7,7 @@ def Load_Result(data_path):
        n = 55
     if(data_path == 1): 
        n =  17 
-    path = f'result_data_{data_path}_part_a.txt'  
+    path = f'result_data_{data_path}_part_b.txt'  
     check_list = np.zeros((n,2),dtype=int)
     with open(path,"r") as f : 
         z = f.readlines()
@@ -19,7 +19,7 @@ def Load_Result(data_path):
                 check_list[id-1][0] += 1  
             else : 
                 check_list[id-1][1] += 1 
-    np.savetxt(f"Balance_Result_{data_path}_part_a",check_list.astype(int),fmt='%d')
+    np.savetxt(f"Balance_Result_{data_path}_part_b",check_list.astype(int),fmt='%d')
 def Balance(balance) : 
       value = []
       for i in range(len(balance)) : 
@@ -27,8 +27,10 @@ def Balance(balance) :
       return value
 if __name__ == "__main__": 
     Load_Result(2)
-    balance = np.loadtxt("Balance_Result_2_part_a")
-    value = Balance(balance)
+    balance = np.loadtxt("Balance_Result_2_part_b")
+    value = np.array(Balance(balance))
+    value = value[value != 0]
+    print(value.shape)
     print(stats.stdev(value))
     plt.hist(value)
     plt.show()
