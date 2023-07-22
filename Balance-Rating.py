@@ -50,7 +50,7 @@ def calculate_standard_deviation(data):
     
     return standard_deviation
 if __name__ == "__main__":
-    part = "a"
+    part = "b"
     method = "IP"
     datapack = 1
     Load_Result(datapack,part = part,method = method)

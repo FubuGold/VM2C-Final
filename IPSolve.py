@@ -252,5 +252,5 @@ def solve_b():
 
 
 if __name__ == "__main__":
-    solve_a()
-    # solve_b()
+    # solve_a()
+    solve_b()
