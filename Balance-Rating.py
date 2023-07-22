@@ -31,8 +31,8 @@ def Balance(balance) :
       value = []
       night_shift = [ ]
       for i in range(len(balance)) : 
-        value.append(balance[i][0] + balance[i][1])
-        night_shift.append(balance[i][0])
+        value.append(balance[i][0])
+        night_shift.append(balance[i][1])
       return value,night_shift
 def calculate_standard_deviation(data):
     n = len(data)
@@ -52,10 +52,19 @@ def calculate_standard_deviation(data):
 if __name__ == "__main__":
     part = "b"
     method = "IP"
-    datapack = 1
+    datapack = 2
     Load_Result(datapack,part = part,method = method)
     balance = np.loadtxt(f"Balance_result_{datapack}_part_{part}_{method}")
+    balance = balance[~(balance == 0).all(axis=1)]
+    print(balance.shape)
     value,night_shift = Balance(balance)
+
     print(stats.stdev(night_shift))
-    plt.hist(night_shift)
-    plt.show()
+    print(stats.stdev(value))
+    plt.plot([], [], ' ', label=f'Total_workers = {len(value)}')
+    plt.hist(night_shift,label = "night_shift")
+    plt.hist(value,label = "total_shift")
+    plt.xticks([i for i in range(30)])
+    plt.subplot
+    plt.legend()
+    plt.show()  
