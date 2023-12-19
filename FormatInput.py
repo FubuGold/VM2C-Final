@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 import os
+
+HOURS_PER_SHIFT = 8
+
 class Readfile:
 
     daychuyen_code_to_id = {'Day_chuyen_1' : 0, 'Day_chuyen_2' : 1,'Day_chuyen_3' : 2}
@@ -44,22 +47,46 @@ class Readfile:
             id = code_to_id[nhan_vien]
             skill[i,id,2] = 1
 
+        def convert_to_start_time(_time):
+            return 6 if 6 <= _time < 14 else 14 if 14 <= _time < 22 else 22
 
-         with open(f"VM2C/{data_path}/lenh_san_xuat_Day_chuyen_{i+1}.txt","r") as f:
-            com = f.readlines()
-            for time in com:
-                time = time.split()
-                if len(time) != 4: continue
-                day = int(time[0][-2:])
-                next_day = int(time[2][-2:])
-                if time[1] < "06:00:00":
-                    timetable[day-1][i][2] = 1
-                if time[1] <= "14:00:00" and time[1] >= "06:00:00":
-                    timetable[day][i][0] = 1
-                if next_day > day or time[3] > "22:00:00":
-                    timetable[day][i][2] = 1
-                if time[1] <= "22:00:00" and time[1] > "14:00:00":
-                    timetable[day][i][1] = 1
+        def convert_to_end_time(_time):
+            return 14 if 6 < _time <= 14 else 22 if 14 < _time <= 22 else 30
+         
+        with open(f"VM2C/{data_path}/lenh_san_xuat_Day_chuyen_{i+1}.txt","r") as f:
+            f.readline()  # Comment line
+            _time = [line.strip().split() for line in f.readlines()]
+
+            shift_start_time = [6, 14, 22]
+            
+            for j in range(len(_time)):
+                start_day = int(_time[j][0][8:10])
+                start_hour = int(_time[j][1][0:2])
+
+                end_day = int(_time[j][2][8:10])
+                end_hour = int(_time[j][3][0:2])
+                
+                if (start_hour >= 0 and start_hour < shift_start_time[0]):
+                    timetable[start_day - 1][i][2] = 1
+                    continue
+                    
+                new_start_hour = convert_to_start_time(start_hour)
+                new_end_hour = convert_to_end_time(end_hour)
+                active_shifts = (new_end_hour - new_start_hour) // HOURS_PER_SHIFT
+                    
+                shifts = [1] * active_shifts
+                if (new_start_hour == shift_start_time[0]):
+                    timetable[start_day][i][:active_shifts] = shifts
+                elif (new_start_hour == shift_start_time[1]):
+                    timetable[start_day][i][1:(active_shifts + 1)] = shifts
+                    if active_shifts > 2:
+                        timetable[start_day + 1][i][0] = 1
+                elif (new_start_hour == shift_start_time[2]):
+                    timetable[start_day][i][2] = 1
+                    if active_shifts > 1:
+                        timetable[start_day + 1][i][:active_shifts] = shifts
+                            
+        print(timetable)
         
         chain_need = [[],[],[]]
         with open(f"VM2C/{data_path}/02_dinh_bien.txt","r") as f:
@@ -146,22 +173,44 @@ class Readfile:
                     f.write(i.split()[2] + '\n') 
 
             timetable = np.zeros( (29,3,3) ,dtype = int)
+            
+            def convert_to_start_time(_time):
+                return 6 if 6 <= _time < 14 else 14 if 14 <= _time < 22 else 22
+
+            def convert_to_end_time(_time):
+                return 14 if 6 < _time <= 14 else 22 if 14 < _time <= 22 else 30
+            
             for i in range(num_folds):
-                with open(f"VM2C/{data_path}/lenh_san_xuat_Day_chuyen_{i+1}.txt","r") as finp:
-                    com = finp.readlines()
-                    for time in com:
-                        time = time.split()
-                        if len(time) != 4: continue
-                        day = int(time[0][-2:])
-                        next_day = int(time[2][-2:])
-                        if time[1] < "06:00:00":
-                            timetable[day-1][i][2] = 1
-                        if time[1] <= "14:00:00" and time[1] >= "06:00:00":
-                            timetable[day][i][0] = 1
-                        if next_day > day or time[3] > "22:00:00":
-                            timetable[day][i][2] = 1
-                        if time[1] <= "22:00:00" and time[1] > "14:00:00":
-                            timetable[day][i][1] = 1
+                with open(f"VM2C/{data_path}/lenh_san_xuat_Day_chuyen_{i+1}.txt","r") as fl:
+                    fl.readline()  # Comment line
+                    _time = [line.strip().split() for line in fl.readlines()]
+                    
+                    start_day = int(_time[i][0][8:10])
+                    start_hour = int(_time[i][1][0:2])
+
+                    end_day = int(_time[i][2][8:10])
+                    end_hour = int(_time[i][3][0:2])
+
+                    shift_start_time = [6, 14, 22]
+                    
+                    if (start_hour >= 0 and start_hour < shift_start_time[0]):
+                        timetable[start_day - 1][i][2] = 1
+                        continue
+                    new_start_hour = convert_to_start_time(start_hour)
+                    new_end_hour = convert_to_end_time(end_hour)
+                    active_shifts = (new_end_hour - new_start_hour) // HOURS_PER_SHIFT
+                    
+                    shifts = [1] * active_shifts
+                    if (new_start_hour == shift_start_time[0]):
+                        timetable[start_day][i][:active_shifts] = shifts
+                    elif (new_start_hour == shift_start_time[1]):
+                        timetable[start_day][i][1:(active_shifts + 1)] = shifts
+                        if active_shifts > 2:
+                            timetable[start_day + 1][i][0] = 1
+                    elif (new_start_hour == shift_start_time[2]):
+                        timetable[start_day][i][2] = 1
+                        if active_shifts > 1:
+                            timetable[start_day + 1][i][:active_shifts] = shifts
 
             for i in range(1,29):
                 for j in range(num_folds):
@@ -174,7 +223,7 @@ class Readfile:
 
 def test():
     Reader = Readfile()
-    Reader.readDatasetFlow(datapack=2)
+    Reader.readDatasetIP(datapack=1)
         
 
 if __name__ == '__main__':
